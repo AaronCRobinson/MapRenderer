@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RimWorld.Planet;
+using System;
 using System.Collections;
 using System.IO;
 using UnityEngine;
@@ -32,6 +33,8 @@ namespace MapRenderer
         private int numCamsZ = 1;
 
         float offset;
+
+        private GameObject reverbDummy;
 
         // NOTE: creating a new camera would be a better solution (how?)
         public RenderMap()
@@ -108,8 +111,8 @@ namespace MapRenderer
             //Log.Message(rootPos.ToString() + " " + this.rootSize.ToString());
             //Log.Message(this.curX.ToString() + " " + this.curZ.ToString());
 
-            Find.CameraDriver.SetRootPosAndSize(this.rootPos, this.rootSize);
-            //this.cam.transform.position = new Vector3(0, this.cam.transform.position.y, 0);
+            //Find.CameraDriver.SetRootPosAndSize(this.rootPos, this.rootSize);
+            this.cam.transform.position = new Vector3(0, this.cam.transform.position.y, 0);
 
             Log.Message(this.cam.transform.position.ToString());
 
@@ -132,6 +135,51 @@ namespace MapRenderer
         {
             string r = Application.dataPath + "/" + imageName + ext;
             return r;
+        }
+
+        public void Awake()
+        {
+            this.ResetSize();
+            this.reverbDummy = GameObject.Find("ReverbZoneDummy");
+            //this.ApplyPositionToGameObject();
+            this.cam.farClipPlane = 71.5f;
+        }
+
+        public void ResetSize()
+        {
+            //this.desiredSize = 24f;
+            this.rootSize = 24f;
+        }
+
+        public void OnPreCull()
+        {
+            Log.Message("OnPreCull");
+            if (LongEventHandler.ShouldWaitForEvent)
+            {
+                return;
+            }
+            if (!WorldRendererUtility.WorldRenderedNow)
+            {
+                Find.VisibleMap.weatherManager.DrawAllWeather();
+            }
+        }
+
+        public void OnPreRender()
+        {
+            Log.Message("OnPreRender");
+            if (LongEventHandler.ShouldWaitForEvent)
+            {
+                return;
+            }
+            if (!WorldRendererUtility.WorldRenderedNow)
+            {
+                Find.VisibleMap.GenerateWaterMap();
+            }
+        }
+
+        public void Update()
+        {
+            Log.Message("Update");
         }
 
         /*private Camera MyCamera
