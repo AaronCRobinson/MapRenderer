@@ -11,35 +11,39 @@ namespace MapRenderer
 
     public class RenderMap : MonoBehaviour
     {
-        private Camera cam;
+        private Camera camera;
         private Map map;
         private Texture2D mapImage;
+
         private Vector3 rememberedRootPos;
         private float rememberedRootSize;
+
+        private int cameraWidth;
+        private int cameraHeight;
+
         private int viewWidth;
         private int viewHeight;
+
         private int mapImageWidth;
         private int mapImageHeight;
 
         private int curX = 0;
         private int curZ = 0;
 
-        private Vector3 rootPos;
-        private float rootSize;
+        //private Vector3 rootPos;
+        //private float rootSize;
 
         private RenderTexture origRT;
 
-        private int numCamsX = 1;
-        private int numCamsZ = 1;
+        private int numCamsX = 3;
+        private int numCamsZ = 3;
 
-        float offset;
-
-        private GameObject reverbDummy;
+        private float start;
 
         // NOTE: creating a new camera would be a better solution (how?)
         public RenderMap()
         {
-            this.cam = Find.Camera;
+            this.camera = Find.Camera;
             this.map = Find.VisibleMap;
 
             //instantiate(cam, transform.position, transform.rotation);
@@ -49,6 +53,7 @@ namespace MapRenderer
             this.rememberedRootSize = map.rememberedCameraPos.rootSize;
 
             int quality = 4;
+            // NOTE: where are these numbers coming from?
             this.viewWidth = map.Size.x * quality;
             this.viewHeight = map.Size.z * quality;
 
@@ -58,13 +63,16 @@ namespace MapRenderer
             this.mapImage = new Texture2D(this.mapImageWidth, this.mapImageHeight, TextureFormat.RGB24, false);
 
             // set data for our camera
-            this.rootSize = rememberedRootSize;
-            this.offset = Mathf.Sqrt(Mathf.Pow(this.rootSize, 2) / 2f);
+            //this.rootSize = rememberedRootSize;
 
-            //Log.Message($"{this.offset} {this.rootSize}");
+            this.start = Mathf.Sqrt(Mathf.Pow(this.rememberedRootSize, 2) / 2f) - 1f;
+            //this.rootPos = new Vector3(start, rememberedRootPos.y, start);
 
-            float start = this.offset - 1f;
-            this.rootPos = new Vector3(start, rememberedRootPos.y, start);
+            this.camera.orthographicSize = Mathf.Round(this.camera.orthographicSize);
+            this.camera.transform.position = new Vector3(this.start, rememberedRootPos.y, this.start);
+
+            this.cameraHeight = Mathf.RoundToInt(this.camera.orthographicSize) * 2;
+            this.cameraWidth = this.cameraHeight; // * cam.aspect;
 
             this.origRT = RenderTexture.active;
         }
@@ -76,24 +84,26 @@ namespace MapRenderer
 
         public IEnumerator Renderer(string imageName)
         {
-            //Log.Message(Find.Camera.transform.position.ToString());
-            Log.Message(this.cam.transform.position.ToString());
+            this.camera.GetComponent<CameraDriver>().enabled = false;
 
-            //float curOffset = 0;
+            float x, z;
             for (int i = 0; i < numCamsZ; i++)
             {
                 this.curX = 0;
-                //this.rootPos.x = this.offset - 1f;
+
                 for (int j = 0; j < numCamsX; j++)
                 {
                     IEnumerator e = this.RenderCurrentView();
                     while (e.MoveNext()) yield return e.Current;
 
                     this.curX += this.viewWidth;
-                    //this.rootPos.x += Mathf.Floor(this.offset) + Mathf.Ceil(this.offset) - 0.5f;
+                    x = this.camera.transform.position.x + this.cameraWidth;
+                    this.UpdatePosition(x);
                 }
                 this.curZ += this.viewHeight;
-                //this.rootPos.z += Mathf.Floor(this.offset) + Mathf.Ceil(this.offset) - 0.5f;
+                x = this.start;
+                z = this.camera.transform.position.z + this.cameraHeight;
+                this.UpdatePosition(x, z);
             }
 
             // TODO: revist `EncodeToJPG`
@@ -101,31 +111,30 @@ namespace MapRenderer
             
             // Restore camera
             RenderTexture.active = this.origRT;
-            this.cam.targetTexture = null;
-
+            this.camera.targetTexture = null;
+            this.camera.GetComponent<CameraDriver>().enabled = true;
             Find.CameraDriver.SetRootPosAndSize(rememberedRootPos, rememberedRootSize);
+        }
+
+        private void UpdatePosition(float x, float? z = null)
+        {
+            if (z == null) z = this.camera.transform.position.z;
+
+            this.camera.transform.position = new Vector3(x, this.camera.transform.position.y, (float)z);
         }
 
         private IEnumerator RenderCurrentView()
         {
-            //Log.Message(rootPos.ToString() + " " + this.rootSize.ToString());
-            //Log.Message(this.curX.ToString() + " " + this.curZ.ToString());
-
-            //Find.CameraDriver.SetRootPosAndSize(this.rootPos, this.rootSize);
-            this.cam.transform.position = new Vector3(0, this.cam.transform.position.y, 0);
-
-            Log.Message(this.cam.transform.position.ToString());
-
-            //Log.Message(RenderTexture.active.ToStringSafe<RenderTexture>());
+            Log.Message(this.camera.transform.position.ToString());
 
             yield return new WaitForEndOfFrame();
 
             // setup camera with target render texture
-            this.cam.targetTexture = new RenderTexture(this.viewWidth, this.viewHeight, 24);
-            RenderTexture.active = this.cam.targetTexture;
+            this.camera.targetTexture = new RenderTexture(this.viewWidth, this.viewHeight, 24);
+            RenderTexture.active = this.camera.targetTexture;
 
             // render the texture
-            this.cam.Render();
+            this.camera.Render();
 
             // write to the map image using the current postion
             this.mapImage.ReadPixels(new Rect(0, 0, this.viewWidth, this.viewHeight), this.curX, this.curZ, false);
@@ -136,73 +145,6 @@ namespace MapRenderer
             string r = Application.dataPath + "/" + imageName + ext;
             return r;
         }
-
-        public void Awake()
-        {
-            this.ResetSize();
-            this.reverbDummy = GameObject.Find("ReverbZoneDummy");
-            //this.ApplyPositionToGameObject();
-            this.cam.farClipPlane = 71.5f;
-        }
-
-        public void ResetSize()
-        {
-            //this.desiredSize = 24f;
-            this.rootSize = 24f;
-        }
-
-        public void OnPreCull()
-        {
-            Log.Message("OnPreCull");
-            if (LongEventHandler.ShouldWaitForEvent)
-            {
-                return;
-            }
-            if (!WorldRendererUtility.WorldRenderedNow)
-            {
-                Find.VisibleMap.weatherManager.DrawAllWeather();
-            }
-        }
-
-        public void OnPreRender()
-        {
-            Log.Message("OnPreRender");
-            if (LongEventHandler.ShouldWaitForEvent)
-            {
-                return;
-            }
-            if (!WorldRendererUtility.WorldRenderedNow)
-            {
-                Find.VisibleMap.GenerateWaterMap();
-            }
-        }
-
-        public void Update()
-        {
-            Log.Message("Update");
-        }
-
-        /*private Camera MyCamera
-        {
-            get
-            {
-                if (this.cameraInt == null)
-                {
-                    Camera rwCamera = Find.Camera;
-                    this.cameraInt = Instantiate(rwCamera) as Camera;
-                    this.cameraInt.CopyFrom(rwCamera);
-                    this.cameraInt.enabled = false;
-                    this.cameraInt.depthTextureMode = DepthTextureMode.None;
-                    this.cameraInt.clearFlags = CameraClearFlags.Nothing;
-
-                    this.cameraInt.depth = 1;
-
-                    Log.Message(Find.Camera.clearFlags.ToString());
-                    Log.Message(Find.Camera.depthTextureMode.ToString());
-                }
-                return this.cameraInt;
-            }
-        }*/
 
     }
 }
