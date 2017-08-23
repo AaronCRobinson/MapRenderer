@@ -66,6 +66,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>xcopy /S /Y "$(TargetDir)*" "C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(ProjectName)\Assemblies\"
-xcopy /S /Y "$(SolutionDir)..\About\*" "C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(ProjectName)\About\"</PostBuildEvent>
+xcopy /S /Y "$(SolutionDir)..\About\*" "C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(ProjectName)\About\"
+xcopy /S /Y "$(SolutionDir)..\Languages\*" "C:\Program Files (x86)\Steam\steamapps\common\RimWorld\Mods\$(ProjectName)\Languages\"</PostBuildEvent>
   </PropertyGroup>
 </Project>

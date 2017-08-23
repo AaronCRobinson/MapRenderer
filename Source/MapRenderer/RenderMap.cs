@@ -11,6 +11,8 @@ namespace MapRenderer
 
     public class RenderMap : MonoBehaviour
     {
+        private const int size = 512;
+
         private Camera camera;
         private Map map;
         private Texture2D mapImage;
@@ -35,8 +37,8 @@ namespace MapRenderer
 
         private RenderTexture origRT;
 
-        private int numCamsX = 3;
-        private int numCamsZ = 3;
+        private int numCamsX;
+        private int numCamsZ;
 
         private float start;
 
@@ -46,33 +48,29 @@ namespace MapRenderer
             this.camera = Find.Camera;
             this.map = Find.VisibleMap;
 
-            //instantiate(cam, transform.position, transform.rotation);
-
             // save camera data
             this.rememberedRootPos = map.rememberedCameraPos.rootPos;
             this.rememberedRootSize = map.rememberedCameraPos.rootSize;
 
-            int quality = 4;
-            // NOTE: where are these numbers coming from?
-            this.viewWidth = map.Size.x * quality;
-            this.viewHeight = map.Size.z * quality;
-
-            this.mapImageWidth = this.viewWidth * numCamsX;
-            this.mapImageHeight = this.viewHeight * numCamsZ;
-
-            this.mapImage = new Texture2D(this.mapImageWidth, this.mapImageHeight, TextureFormat.RGB24, false);
-
-            // set data for our camera
-            //this.rootSize = rememberedRootSize;
-
             this.start = Mathf.Sqrt(Mathf.Pow(this.rememberedRootSize, 2) / 2f) - 1f;
-            //this.rootPos = new Vector3(start, rememberedRootPos.y, start);
 
             this.camera.orthographicSize = Mathf.Round(this.camera.orthographicSize);
             this.camera.transform.position = new Vector3(this.start, rememberedRootPos.y, this.start);
 
+            // NOTE: where are these numbers coming from?
+            this.viewWidth = size;
+            this.viewHeight = size;
+
             this.cameraHeight = Mathf.RoundToInt(this.camera.orthographicSize) * 2;
             this.cameraWidth = this.cameraHeight; // * cam.aspect;
+
+            this.numCamsX = (map.Size.x + this.cameraWidth + 1) / this.cameraWidth;
+            this.numCamsZ = (map.Size.z + this.cameraHeight + 1) / this.cameraHeight;
+
+            this.mapImageWidth = this.viewWidth * this.numCamsX;
+            this.mapImageHeight = this.viewHeight * this.numCamsZ;
+
+            this.mapImage = new Texture2D(this.mapImageWidth, this.mapImageHeight, TextureFormat.RGB24, false);
 
             this.origRT = RenderTexture.active;
         }
@@ -86,6 +84,10 @@ namespace MapRenderer
         {
             this.camera.GetComponent<CameraDriver>().enabled = false;
 
+            // NOTE: not sure why this happens but sometimes need to rerender the first frame
+            IEnumerator e = this.RenderCurrentView();
+            while (e.MoveNext()) yield return e.Current;
+
             float x, z;
             for (int i = 0; i < numCamsZ; i++)
             {
@@ -93,7 +95,7 @@ namespace MapRenderer
 
                 for (int j = 0; j < numCamsX; j++)
                 {
-                    IEnumerator e = this.RenderCurrentView();
+                    e = this.RenderCurrentView();
                     while (e.MoveNext()) yield return e.Current;
 
                     this.curX += this.viewWidth;

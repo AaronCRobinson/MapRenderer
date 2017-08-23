@@ -35,7 +35,7 @@ namespace MapRenderer
         public Dialog_RenderMap()
         {
             this.title = "MapRender".Translate();
-            this.text = "Testing a text";
+            this.text = "MapRenderDescription".Translate();
             this.buttonAText = "Render".Translate();
             this.buttonAAction = () => {
                 RenderMap renderMap = new RenderMap();
