@@ -11,8 +11,6 @@ namespace MapRenderer
 
     public class RenderMap : MonoBehaviour
     {
-        private const int size = 512;
-
         private Camera camera;
         private Map map;
         private Texture2D mapImage;
@@ -31,9 +29,6 @@ namespace MapRenderer
 
         private int curX = 0;
         private int curZ = 0;
-
-        //private Vector3 rootPos;
-        //private float rootSize;
 
         private RenderTexture origRT;
 
@@ -57,9 +52,8 @@ namespace MapRenderer
             this.camera.orthographicSize = Mathf.Round(this.camera.orthographicSize);
             this.camera.transform.position = new Vector3(this.start, rememberedRootPos.y, this.start);
 
-            // NOTE: where are these numbers coming from?
-            this.viewWidth = size;
-            this.viewHeight = size;
+            this.viewWidth = MapRendererMod.settings.quality;
+            this.viewHeight = MapRendererMod.settings.quality;
 
             this.cameraHeight = Mathf.RoundToInt(this.camera.orthographicSize) * 2;
             this.cameraWidth = this.cameraHeight; // * cam.aspect;
@@ -70,6 +64,7 @@ namespace MapRenderer
             this.mapImageWidth = this.viewWidth * this.numCamsX;
             this.mapImageHeight = this.viewHeight * this.numCamsZ;
 
+            //this.mapImage = new Texture2D(this.mapImageWidth, this.mapImageHeight, TextureFormat.RGB24, false);
             this.mapImage = new Texture2D(this.mapImageWidth, this.mapImageHeight, TextureFormat.RGB24, false);
 
             this.origRT = RenderTexture.active;
@@ -108,8 +103,11 @@ namespace MapRenderer
                 this.UpdatePosition(x, z);
             }
 
-            // TODO: revist `EncodeToJPG`
-            File.WriteAllBytes(OurTempSquareImageLocation(imageName), this.mapImage.EncodeToPNG());
+            // TODO: Good god jim... use enums... (if you can...)
+            if (MapRendererMod.settings.exportFormat == "PNG")
+                File.WriteAllBytes(OurTempSquareImageLocation(imageName), this.mapImage.EncodeToPNG());
+            else
+                File.WriteAllBytes(OurTempSquareImageLocation(imageName, ".jpg"), this.mapImage.EncodeToJPG());
             
             // Restore camera
             RenderTexture.active = this.origRT;

@@ -15,7 +15,7 @@ namespace MapRenderer
         {
             if (Current.ProgramState == ProgramState.Playing)
             {
-                ListableOption item = new ListableOption("MapRender".Translate(), delegate
+                ListableOption item = new ListableOption("MR_MapRender".Translate(), delegate
                 {
                     MI_CloseMainTab.Invoke(null, new object[] { });
                     Find.WindowStack.Add(new Dialog_RenderMap());

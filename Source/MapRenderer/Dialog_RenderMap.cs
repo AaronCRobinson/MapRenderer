@@ -34,14 +34,14 @@ namespace MapRenderer
 
         public Dialog_RenderMap()
         {
-            this.title = "MapRender".Translate();
-            this.text = "MapRenderDescription".Translate();
-            this.buttonAText = "Render".Translate();
+            this.title = "MR_MapRender".Translate();
+            this.text = "MR_MapRenderDescription".Translate();
+            this.buttonAText = "MR_RenderButtonLabel".Translate();
             this.buttonAAction = () => {
                 RenderMap renderMap = new RenderMap();
                 renderMap.Render();
             };
-            this.buttonBText = "Close".Translate();
+            this.buttonBText = "MR_CloseButtoLabel".Translate();
             this.buttonBAction = () => { };
             this.creationRealTime = RealTime.LastRealTime;
             this.forcePause = true;
