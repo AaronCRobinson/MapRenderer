@@ -47,24 +47,22 @@ namespace MapRenderer
             this.rememberedRootPos = map.rememberedCameraPos.rootPos;
             this.rememberedRootSize = map.rememberedCameraPos.rootSize;
 
-            this.start = Mathf.Sqrt(Mathf.Pow(this.rememberedRootSize, 2) / 2f) - 1f;
-
-            this.camera.orthographicSize = Mathf.Round(this.camera.orthographicSize);
+            this.camera.orthographicSize = 12.5f; //Mathf.Round(this.camera.orthographicSize);
+            this.start = this.camera.orthographicSize;
             this.camera.transform.position = new Vector3(this.start, rememberedRootPos.y, this.start);
+
+            this.cameraHeight = Mathf.RoundToInt(this.camera.orthographicSize * 2);
+            this.cameraWidth = this.cameraHeight; // * cam.aspect;
 
             this.viewWidth = MapRendererMod.settings.quality;
             this.viewHeight = MapRendererMod.settings.quality;
 
-            this.cameraHeight = Mathf.RoundToInt(this.camera.orthographicSize) * 2;
-            this.cameraWidth = this.cameraHeight; // * cam.aspect;
-
-            this.numCamsX = (map.Size.x + this.cameraWidth + 1) / this.cameraWidth;
-            this.numCamsZ = (map.Size.z + this.cameraHeight + 1) / this.cameraHeight;
+            this.numCamsX = (map.Size.x / 25);
+            this.numCamsZ = (map.Size.z / 25);
 
             this.mapImageWidth = this.viewWidth * this.numCamsX;
             this.mapImageHeight = this.viewHeight * this.numCamsZ;
 
-            //this.mapImage = new Texture2D(this.mapImageWidth, this.mapImageHeight, TextureFormat.RGB24, false);
             this.mapImage = new Texture2D(this.mapImageWidth, this.mapImageHeight, TextureFormat.RGB24, false);
 
             this.origRT = RenderTexture.active;
@@ -107,7 +105,7 @@ namespace MapRenderer
             if (MapRendererMod.settings.exportFormat == "PNG")
                 File.WriteAllBytes(OurTempSquareImageLocation(imageName), this.mapImage.EncodeToPNG());
             else
-                File.WriteAllBytes(OurTempSquareImageLocation(imageName, ".jpg"), this.mapImage.EncodeToJPG());
+                File.WriteAllBytes(OurTempSquareImageLocation(imageName, "jpg"), this.mapImage.EncodeToJPG());
             
             // Restore camera
             RenderTexture.active = this.origRT;
@@ -125,8 +123,6 @@ namespace MapRenderer
 
         private IEnumerator RenderCurrentView()
         {
-            Log.Message(this.camera.transform.position.ToString());
-
             yield return new WaitForEndOfFrame();
 
             // setup camera with target render texture
@@ -140,10 +136,10 @@ namespace MapRenderer
             this.mapImage.ReadPixels(new Rect(0, 0, this.viewWidth, this.viewHeight), this.curX, this.curZ, false);
         }
 
-        private string OurTempSquareImageLocation(string imageName, string ext= ".png")
+        private string OurTempSquareImageLocation(string imageName, string ext = "png")
         {
-            string r = Application.dataPath + "/" + imageName + ext;
-            return r;
+            //string r = Application.dataPath + "/" + imageName + ext;
+            return Path.Combine(MapRendererMod.settings.path, $"{imageName}.{ext}");
         }
 
     }

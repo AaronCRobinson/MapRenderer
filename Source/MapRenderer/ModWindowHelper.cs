@@ -11,6 +11,7 @@ namespace ModSettingsHelper
         static float topPad = 30f;
         static float leftPad = 0f;
         static float vspacing = 30f; // same as radioListItemHeight
+        static float textFieldPadding = 10f; // same as radioListItemHeight
         static float curY = topPad;
         static float curX = leftPad;
 
@@ -26,10 +27,20 @@ namespace ModSettingsHelper
             MakeLabel(inRect.width - 64f, label);
         }
 
+        static public void MakeLabeledTextField(Rect inRect, string label, ref string val)
+        {
+            curY += textFieldPadding;
+            Widgets.Label(new Rect(0f, curY + 5f, inRect.width - 16f, 40f), label);
+            Widgets.TextField(new Rect(50f, curY + 6f, inRect.width - 16f, 40f), val);
+            curY += vspacing + textFieldPadding;
+        }
+
         // TODO: rewrite this -> it's ugly.
         static public void MakeTextFieldNumericLabeled<T>(Rect inRect, string label, ref T val, ref string buffer, float min, float max) where T : struct
         {
+            curY += textFieldPadding;
             Widgets.TextFieldNumericLabeled<T>(new Rect(0f, curY + 5f, inRect.width - 16f, 40f), label, ref val, ref buffer, min, max);
+            curY += vspacing + textFieldPadding;
         }
 
         static private void MakeLabel(float width, string label)
@@ -63,7 +74,7 @@ namespace ModSettingsHelper
                     val = item.Value;
                 }
             }
-            curY += vspacing + 5f;
+            curY += vspacing;
         }
 
         // NOTE: consider using an enum...

@@ -1,6 +1,6 @@
-﻿using Verse;
+﻿using System;
+using Verse;
 using UnityEngine;
-using System.Collections.Generic;
 using ModSettingsHelper;
 
 namespace MapRenderer
@@ -8,16 +8,32 @@ namespace MapRenderer
     public class MapRendererSettings : ModSettings
     {
         private const string defaulfExportFormat = "JPG";
-        private const int defaultQuality = 512;
+        private const int defaultQuality = 750;
 
         public string exportFormat = defaulfExportFormat;
+        public string path;
         public int quality = defaultQuality;
+
+        // NOTE: is this redudant?
+        public MapRendererSettings()
+        {
+            this.path = DesktopPath;
+        }
 
         public override void ExposeData()
         {
             base.ExposeData();
             Scribe_Values.Look(ref this.exportFormat, "exportFormat", defaulfExportFormat);
             Scribe_Values.Look(ref this.quality, "quality", defaultQuality);
+            Scribe_Values.Look(ref this.path, "path", DesktopPath);
+        }
+
+        private string DesktopPath
+        {
+            get
+            {
+                return Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            }
         }
     }
 
@@ -40,7 +56,8 @@ namespace MapRenderer
         {
             ModWindowHelper.Reset();
             AddExportFormatOptions(inRect);
-            ModWindowHelper.MakeTextFieldNumericLabeled<int>(inRect, "MR_QualityLabel".Translate(), ref settings.quality, ref this.qualityBuffer, 0, 32768);
+            ModWindowHelper.MakeTextFieldNumericLabeled<int>(inRect, "MR_QualityLabel".Translate(), ref settings.quality, ref this.qualityBuffer, 0, 1500);
+            ModWindowHelper.MakeLabeledTextField(inRect, "MR_PathLabel".Translate(), ref settings.path);
             settings.Write();
         }
 

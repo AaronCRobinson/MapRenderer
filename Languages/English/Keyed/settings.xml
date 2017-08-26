@@ -6,5 +6,6 @@
   <MR_CloseButtoLabel>Close</MR_CloseButtoLabel>
   <MR_MapRenderDescription>To render the map click 'render'.</MR_MapRenderDescription>
   <MR_QualityLabel>Quality</MR_QualityLabel>
+  <MR_PathLabel>Path</MR_PathLabel>
 
 </LanguageData>
