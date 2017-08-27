@@ -132,6 +132,7 @@ namespace MapRenderer
             RenderTexture.active = this.camera.targetTexture;
 
             // render the texture
+            if (MapRendererMod.settings.showWeather) this.map.weatherManager.DrawAllWeather();
             this.camera.Render();
 
             // write to the map image using the current postion

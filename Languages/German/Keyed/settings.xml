@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+  <MR_MapRender>Karten Renderer</MR_MapRender>
+  <MR_RenderButtonLabel>Render</MR_RenderButtonLabel>
+  <MR_CloseButtoLabel>Schließen</MR_CloseButtoLabel>
+  <MR_MapRenderDescription>Um die Karte zu rendern, klicke auf 'Render'.</MR_MapRenderDescription>
+  <MR_AddExportFormatOptionsDescription>Wähle das gewünschte Exportformat</MR_AddExportFormatOptionsDescription>
+  <MR_QualityLabel>Qualität</MR_QualityLabel>
+  <MR_PathLabel>Pfad</MR_PathLabel>
+  <MR_ShowWeatherLabel>Wetter anzeigen</MR_ShowWeatherLabel>
+</LanguageData>

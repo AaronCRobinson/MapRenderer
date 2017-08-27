@@ -6,6 +6,12 @@ This mod allows you to generate the full map as a png via using the settings men
 
 The button to use this feature is right under `save game`. Settings are also available that allow customization.
 
+## Translations
+
+Thanks to all who helped with translations.
+
+German - Erdelf
+
 ## Acknowledgements
 
 Thanks to Brrainz, Erdelf, Spdskatr, Mehni, Xen, and many others for comments and suggestions. 

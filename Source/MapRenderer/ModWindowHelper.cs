@@ -31,7 +31,7 @@ namespace ModSettingsHelper
         {
             curY += textFieldPadding;
             Widgets.Label(new Rect(0f, curY + 5f, inRect.width - 16f, 40f), label);
-            Widgets.TextField(new Rect(50f, curY + 6f, inRect.width - 16f, 40f), val);
+            val = Widgets.TextField(new Rect(50f, curY + 6f, inRect.width - 16f, 40f), val);
             curY += vspacing + textFieldPadding;
         }
 
