@@ -106,6 +106,8 @@ namespace MapRenderer
                 File.WriteAllBytes(OurTempSquareImageLocation(imageName), this.mapImage.EncodeToPNG());
             else
                 File.WriteAllBytes(OurTempSquareImageLocation(imageName, "jpg"), this.mapImage.EncodeToJPG());
+
+            Destroy(this.mapImage);
             
             // Restore camera
             RenderTexture.active = this.origRT;
