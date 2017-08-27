@@ -39,7 +39,6 @@ namespace MapRenderer
         }
 
         private static MethodInfo MI = AccessTools.Method(typeof(Helper), nameof(Helper.AddRenderOption));
-        
 
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator il)
         {
@@ -47,9 +46,9 @@ namespace MapRenderer
             {
                 if (instruction.opcode == OpCodes.Ldarg_1)
                 {
-                    yield return new CodeInstruction(OpCodes.Ldloc_2); //optList1
+                    yield return new CodeInstruction(OpCodes.Ldloc_2) { labels = instruction.labels }; ; //optList1
                     yield return new CodeInstruction(OpCodes.Call, MI);
-                    yield return instruction;
+                    yield return new CodeInstruction(instruction.opcode, instruction.operand);
                 }
                 else
                     yield return instruction;
