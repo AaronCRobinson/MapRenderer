@@ -31,6 +31,7 @@ namespace MapRenderer
         private int curZ = 0;
 
         private RenderTexture origRT;
+        private RenderTexture curRT;
 
         private int numCamsX;
         private int numCamsZ;
@@ -103,17 +104,24 @@ namespace MapRenderer
 
             // TODO: Good god jim... use enums... (if you can...)
             if (MapRendererMod.settings.exportFormat == "PNG")
-                File.WriteAllBytes(OurTempSquareImageLocation(imageName), this.mapImage.EncodeToPNG());
+                File.WriteAllBytes(ImagePath(imageName), this.mapImage.EncodeToPNG());
             else
-                File.WriteAllBytes(OurTempSquareImageLocation(imageName, "jpg"), this.mapImage.EncodeToJPG());
+                File.WriteAllBytes(ImagePath(imageName, "jpg"), this.mapImage.EncodeToJPG());
 
             Destroy(this.mapImage);
-            
+
             // Restore camera
-            RenderTexture.active = this.origRT;
-            this.camera.targetTexture = null;
+            this.RestoreCamera();
             this.camera.GetComponent<CameraDriver>().enabled = true;
             Find.CameraDriver.SetRootPosAndSize(rememberedRootPos, rememberedRootSize);
+
+            Destroy(this);
+        }
+
+        private void RestoreCamera()
+        {
+            RenderTexture.active = this.origRT;
+            this.camera.targetTexture = null;
         }
 
         private void UpdatePosition(float x, float? z = null)
@@ -125,24 +133,49 @@ namespace MapRenderer
 
         private IEnumerator RenderCurrentView()
         {
+            Log.Message("RenderCurrentView!!");
             yield return new WaitForEndOfFrame();
+            Log.Message("AfterFrame!!");
 
             // setup camera with target render texture
-            this.camera.targetTexture = new RenderTexture(this.viewWidth, this.viewHeight, 24);
+            this.curRT = new RenderTexture(this.viewWidth, this.viewHeight, 24);
+
+            this.camera.targetTexture = this.curRT;
             RenderTexture.active = this.camera.targetTexture;
 
             // render the texture
             if (MapRendererMod.settings.showWeather) this.map.weatherManager.DrawAllWeather();
             this.camera.Render();
 
+            this.RestoreCamera();
+
+            yield return new WaitForEndOfFrame();
+            Log.Message("AfterFrame2!!");
+
+            this.camera.targetTexture = this.curRT;
+            RenderTexture.active = this.camera.targetTexture;
+
             // write to the map image using the current postion
             this.mapImage.ReadPixels(new Rect(0, 0, this.viewWidth, this.viewHeight), this.curX, this.curZ, false);
         }
 
-        private string OurTempSquareImageLocation(string imageName, string ext = "png")
+        private string ImagePath(string imageName, string ext = "png")
         {
             //string r = Application.dataPath + "/" + imageName + ext;
             return Path.Combine(MapRendererMod.settings.path, $"{imageName}.{ext}");
+        }
+
+        public void OnGUI()
+        {
+            Log.Message("OnGUI!!");
+
+            this.camera.targetTexture = this.curRT;
+            RenderTexture.active = this.camera.targetTexture;
+
+            Find.MapUI.thingOverlays.ThingOverlaysOnGUI();
+            //Find.MapUI.MapInterfaceOnGUI_BeforeMainTabs();
+
+            this.RestoreCamera();
         }
 
     }
