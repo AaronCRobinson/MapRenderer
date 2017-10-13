@@ -184,7 +184,7 @@ namespace MapRenderer
             Log.Message("WaitForEndOfFrame Done!");
 
             // setup camera with target render texture
-            this.camera.targetTexture = new RenderTexture(this.viewWidth, this.viewHeight, 32);
+            this.camera.targetTexture = new RenderTexture(this.viewWidth, this.viewHeight, 32, RenderTextureFormat.BGRA32);
             RenderTexture.active = this.camera.targetTexture;
 
             // render the texture
@@ -196,9 +196,9 @@ namespace MapRenderer
             //this.bmpData
 
             this.temp = new Texture2D(this.viewWidth, this.viewHeight, TextureFormat.BGRA32, false);
-            //this.temp.ReadPixels(new Rect(0, 0, this.viewWidth, this.viewHeight), 0, 0, false);
-            UnityEngine.Graphics.CopyTexture(this.camera.targetTexture, this.temp);
             this.temp.ReadPixels(new Rect(0, 0, this.viewWidth, this.viewHeight), 0, 0, false);
+            //UnityEngine.Graphics.CopyTexture(this.camera.targetTexture, this.temp);
+            //this.temp.ReadPixels(new Rect(0, 0, this.viewWidth, this.viewHeight), 0, 0, false);
 
             Log.Message("start copy!");
             Copy(temp, this.bmpData);
