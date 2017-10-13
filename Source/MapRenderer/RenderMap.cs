@@ -33,8 +33,6 @@ namespace MapRenderer
         private int curX = 0;
         private int curZ = 0;
 
-        //private RenderTexture origRT;
-
         private int numCamsX;
         private int numCamsZ;
 
@@ -43,7 +41,8 @@ namespace MapRenderer
         private BitmapData bmpData;
         private Bitmap bmp;
 
-        private Texture2D temp;
+        private RenderTexture rt;
+        private Texture2D tempTexture;
 
         // NOTE: creating a new camera would be a better solution (how?)
         public RenderMap()
@@ -55,12 +54,12 @@ namespace MapRenderer
             this.rememberedRootPos = map.rememberedCameraPos.rootPos;
             this.rememberedRootSize = map.rememberedCameraPos.rootSize;
 
-            this.camera.orthographicSize = 12.5f; //Mathf.Round(this.camera.orthographicSize);
+            this.camera.orthographicSize = 12.5f;
             this.start = this.camera.orthographicSize;
             this.camera.transform.position = new Vector3(this.start, rememberedRootPos.y, this.start);
 
             this.cameraHeight = Mathf.RoundToInt(this.camera.orthographicSize * 2);
-            this.cameraWidth = this.cameraHeight; // * cam.aspect;
+            this.cameraWidth = this.cameraHeight;
 
             this.viewWidth = MapRendererMod.settings.quality;
             this.viewHeight = MapRendererMod.settings.quality;
@@ -71,11 +70,7 @@ namespace MapRenderer
             this.mapImageWidth = this.viewWidth * this.numCamsX;
             this.mapImageHeight = this.viewHeight * this.numCamsZ;
 
-            //this.bmp = new Bitmap(this.mapImageWidth, this.mapImageHeight, PixelFormat.Format24bppRgb);
-            this.bmp = new Bitmap(this.viewWidth, this.viewHeight, PixelFormat.Format24bppRgb);
-            //this.mapImage = new Texture2D(this.mapImageWidth, this.mapImageHeight, TextureFormat.RGB24, false);
-
-            //this.origRT = RenderTexture.active;
+            this.bmp = new Bitmap(this.mapImageWidth, this.mapImageHeight, PixelFormat.Format24bppRgb);
         }
 
         public void Render()
@@ -87,14 +82,15 @@ namespace MapRenderer
         {
             this.camera.GetComponent<CameraDriver>().enabled = false;
 
-            this.bmpData = bmp.LockBits(new Rectangle(0, 0, this.viewWidth, this.viewHeight), ImageLockMode.ReadWrite, bmp.PixelFormat);
+            // setup camera with target render texture
+            this.rt = new RenderTexture(this.viewWidth, this.viewHeight, 32, RenderTextureFormat.ARGB32);
+            this.tempTexture = new Texture2D(this.viewWidth, this.viewHeight, TextureFormat.RGB24, false);
 
             // NOTE: not sure why this happens but sometimes need to rerender the first frame
             IEnumerator e = this.RenderCurrentView();
             while (e.MoveNext()) yield return e.Current;
 
-
-            /*float x, z;
+            float x, z;
             for (int i = 0; i < numCamsZ; i++)
             {
                 this.curX = 0;
@@ -112,38 +108,21 @@ namespace MapRenderer
                 x = this.start;
                 z = this.camera.transform.position.z + this.cameraHeight;
                 this.UpdatePosition(x, z);
-            }*/
+            }
 
-            this.bmp.UnlockBits(bmpData);
-
-            /*
             if (MapRendererMod.settings.exportFormat == "PNG")
-                File.WriteAllBytes(OurTempSquareImageLocation(imageName), this.mapImage.EncodeToPNG());
+                bmp.Save(OurTempSquareImageLocation(imageName, "png"), ImageFormat.Png);
             else
-                File.WriteAllBytes(OurTempSquareImageLocation(imageName, "jpg"), this.mapImage.EncodeToJPG());
-            */
-
-            /*using (System.Drawing.Graphics grf = System.Drawing.Graphics.FromImage(bmp))
-            {
-                using (Brush brsh = new SolidBrush(ColorTranslator.FromHtml("#ff00ffff")))
-                {
-                    grf.FillEllipse(brsh, 0, 0, 19, 19);
-                }
-            }*/
-
-            File.WriteAllBytes(OurTempSquareImageLocation("junk"), temp.EncodeToPNG());
-            bmp.Save(OurTempSquareImageLocation("png_Ver", "png"), ImageFormat.Png);
-
-            Log.Message("Finished!");
-
-            //Destroy(this.mapImage);
-
+                bmp.Save(OurTempSquareImageLocation(imageName, "jpg"), ImageFormat.Jpeg);
 
             // Restore camera
             RenderTexture.active = null;
             this.camera.targetTexture = null;
             this.camera.GetComponent<CameraDriver>().enabled = true;
             Find.CameraDriver.SetRootPosAndSize(rememberedRootPos, rememberedRootSize);
+
+            Destroy(this.rt);
+            Destroy(this.tempTexture);
         }
 
         private void UpdatePosition(float x, float? z = null)
@@ -153,26 +132,11 @@ namespace MapRenderer
             this.camera.transform.position = new Vector3(x, this.camera.transform.position.y, (float)z);
         }
 
-        /*[DllImport("kernel32.dll", EntryPoint = "CopyMemory", SetLastError = false)]
-        private unsafe static extern void CopyMemory(void* dest, void* src, uint count);*/
-        /*
-        private unsafe static void Copy(Texture2D source, BitmapData dest)
-        {
-            uint count = (uint)(source.width * source.height * 3);
-            //byte[] textureData = source.GetRawTextureData();
-            UnityEngine.Color[] textureData = source.GetPixels();
-            fixed (void* pSource = textureData)
-            {
-                CopyMemory((void*) dest.Scan0, pSource, count);
-            }
-        }*/
-
-        public struct Pixels24bpp {
+        private struct Pixels24bpp {
             public byte R;
             public byte G;
             public byte B;
         }
-
 
         private static unsafe void CopyLine(Pixels24bpp* source, Pixels24bpp* dest, uint count){
             for (uint i = 0; i < count; i++) {
@@ -183,7 +147,6 @@ namespace MapRenderer
                 source++;
             }
         }
-
 
         private static unsafe void Copy(Texture2D source, BitmapData dest)
         {
@@ -208,6 +171,7 @@ namespace MapRenderer
 
                     pSource += width;                                           // advance source buffer by line size
                     pDest = (Pixels24bpp*) ((byte*) pDest - stride);            // advance (or rather decrease) destination buffer by stride size
+
                 }
             }
             
@@ -217,34 +181,27 @@ namespace MapRenderer
         {
             yield return new WaitForEndOfFrame();
 
-            Log.Message("WaitForEndOfFrame Done!");
+            RenderTexture.active = this.camera.targetTexture = this.rt;
 
-            // setup camera with target render texture
-            this.camera.targetTexture = new RenderTexture(this.viewWidth, this.viewHeight, 32, RenderTextureFormat.ARGB32);
-            RenderTexture.active = this.camera.targetTexture;
+            // lock section of bitmap (reverting y)
+            this.bmpData = bmp.LockBits(new Rectangle(this.curX, this.mapImageHeight-this.curZ-this.viewHeight, this.viewWidth, this.viewHeight), ImageLockMode.ReadWrite, bmp.PixelFormat);
 
             // render the texture
             if (MapRendererMod.settings.showWeather) this.map.weatherManager.DrawAllWeather();
             this.camera.Render();
 
+            this.tempTexture.ReadPixels(new Rect(0, 0, this.viewWidth, this.viewHeight), 0, 0, false);
+
             // write to the map image using the current postion
-            //this.mapImage.ReadPixels(new Rect(0, 0, this.viewWidth, this.viewHeight), this.curX, this.curZ, false);
-            //this.bmpData
+            Copy(this.tempTexture, this.bmpData);
 
-            this.temp = new Texture2D(this.viewWidth, this.viewHeight, TextureFormat.RGB24, false);
-            this.temp.ReadPixels(new Rect(0, 0, this.viewWidth, this.viewHeight), 0, 0, false);
-            //UnityEngine.Graphics.CopyTexture(this.camera.targetTexture, this.temp);
-            //this.temp.ReadPixels(new Rect(0, 0, this.viewWidth, this.viewHeight), 0, 0, false);
+            this.bmp.UnlockBits(bmpData);
 
-            Log.Message("start copy!");
-            Copy(temp, this.bmpData);
-            Log.Message("copy finished!");
-
+            RenderTexture.active = this.camera.targetTexture = null;
         }
 
         private string OurTempSquareImageLocation(string imageName, string ext = "png")
         {
-            //string r = Application.dataPath + "/" + imageName + ext;
             return Path.Combine(MapRendererMod.settings.path, $"{imageName}.{ext}");
         }
 
