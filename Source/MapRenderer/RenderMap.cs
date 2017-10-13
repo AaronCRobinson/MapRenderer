@@ -72,7 +72,7 @@ namespace MapRenderer
             this.mapImageHeight = this.viewHeight * this.numCamsZ;
 
             //this.bmp = new Bitmap(this.mapImageWidth, this.mapImageHeight, PixelFormat.Format24bppRgb);
-            this.bmp = new Bitmap(this.viewWidth, this.viewHeight, PixelFormat.Format32bppArgb);
+            this.bmp = new Bitmap(this.viewWidth, this.viewHeight, PixelFormat.Format24bppRgb);
             //this.mapImage = new Texture2D(this.mapImageWidth, this.mapImageHeight, TextureFormat.RGB24, false);
 
             //this.origRT = RenderTexture.active;
@@ -132,9 +132,7 @@ namespace MapRenderer
             }*/
 
             File.WriteAllBytes(OurTempSquareImageLocation("junk"), temp.EncodeToPNG());
-            bmp.Save(OurTempSquareImageLocation("bmp_ver", "bmp"), ImageFormat.Bmp);
             bmp.Save(OurTempSquareImageLocation("png_Ver", "png"), ImageFormat.Png);
-            bmp.Save(OurTempSquareImageLocation("jpg_ver", "jpg"), ImageFormat.Jpeg);
 
             Log.Message("Finished!");
 
@@ -156,8 +154,8 @@ namespace MapRenderer
         }
 
         /*[DllImport("kernel32.dll", EntryPoint = "CopyMemory", SetLastError = false)]
-        private unsafe static extern void CopyMemory(void* dest, void* src, uint count);
-
+        private unsafe static extern void CopyMemory(void* dest, void* src, uint count);*/
+        /*
         private unsafe static void Copy(Texture2D source, BitmapData dest)
         {
             uint count = (uint)(source.width * source.height * 3);
@@ -169,12 +167,50 @@ namespace MapRenderer
             }
         }*/
 
-        private static void Copy(Texture2D source, BitmapData dest)
+        public struct Pixels24bpp {
+            public byte R;
+            public byte G;
+            public byte B;
+        }
+
+
+        private static unsafe void CopyLine(Pixels24bpp* source, Pixels24bpp* dest, uint count){
+            for (uint i = 0; i < count; i++) {
+                dest->R = source->B;
+                dest->G = source->G;
+                dest->B = source->R;
+                dest++;
+                source++;
+            }
+        }
+
+
+        private static unsafe void Copy(Texture2D source, BitmapData dest)
         {
-            int count = source.width * source.height * 4;
             byte[] textureData = source.GetRawTextureData();
-            //for (int i = 0; i < count; i += 4)
-            Marshal.Copy(textureData, 0, dest.Scan0, count);
+
+            uint height = (uint) Math.Abs(dest.Height);
+            uint stride = (uint) Math.Abs(dest.Stride);     // stride can be negative
+
+            /* need to copy line by line because
+             *  
+             *  a) otherwise results will be top/down
+             *  b) bitmaps are aligned to 4byte boundaries per line length - our texture might not match that
+             * 
+             */
+            uint width = (uint)source.width;
+
+            fixed (void* pRawPixels = textureData) {
+                Pixels24bpp* pSource = (Pixels24bpp*) pRawPixels;
+                Pixels24bpp* pDest = (Pixels24bpp*) ((byte*) (void*) dest.Scan0 + (source.height-1) * dest.Stride);
+                for (uint y = 0; y < height; y++) {
+                    CopyLine(pSource, pDest, width);
+
+                    pSource += width;                                           // advance source buffer by line size
+                    pDest = (Pixels24bpp*) ((byte*) pDest - stride);            // advance (or rather decrease) destination buffer by stride size
+                }
+            }
+            
         }
 
         private IEnumerator RenderCurrentView()
@@ -184,7 +220,7 @@ namespace MapRenderer
             Log.Message("WaitForEndOfFrame Done!");
 
             // setup camera with target render texture
-            this.camera.targetTexture = new RenderTexture(this.viewWidth, this.viewHeight, 32, RenderTextureFormat.BGRA32);
+            this.camera.targetTexture = new RenderTexture(this.viewWidth, this.viewHeight, 32, RenderTextureFormat.ARGB32);
             RenderTexture.active = this.camera.targetTexture;
 
             // render the texture
@@ -195,7 +231,7 @@ namespace MapRenderer
             //this.mapImage.ReadPixels(new Rect(0, 0, this.viewWidth, this.viewHeight), this.curX, this.curZ, false);
             //this.bmpData
 
-            this.temp = new Texture2D(this.viewWidth, this.viewHeight, TextureFormat.BGRA32, false);
+            this.temp = new Texture2D(this.viewWidth, this.viewHeight, TextureFormat.RGB24, false);
             this.temp.ReadPixels(new Rect(0, 0, this.viewWidth, this.viewHeight), 0, 0, false);
             //UnityEngine.Graphics.CopyTexture(this.camera.targetTexture, this.temp);
             //this.temp.ReadPixels(new Rect(0, 0, this.viewWidth, this.viewHeight), 0, 0, false);
