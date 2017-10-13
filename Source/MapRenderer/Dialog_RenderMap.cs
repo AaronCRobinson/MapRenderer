@@ -39,7 +39,6 @@ namespace MapRenderer
             this.buttonAText = "MR_RenderButtonLabel".Translate();
             this.buttonAAction = () => {
                 RenderMap renderMap = GameObject.Find("GameRoot").AddComponent<RenderMap>() as RenderMap;
-                //RenderMap renderMap = new RenderMap();
                 renderMap.Render();
             };
             this.buttonBText = "MR_CloseButtoLabel".Translate();
