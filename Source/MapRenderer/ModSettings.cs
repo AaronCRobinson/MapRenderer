@@ -1,7 +1,7 @@
 ﻿using System;
 using Verse;
 using UnityEngine;
-using ModSettingsHelper;
+using SettingsHelper;
 
 namespace MapRenderer
 {
@@ -45,31 +45,27 @@ namespace MapRenderer
 
         public static string[] exportFormats = { "JPG", "PNG" };
 
-        private string qualityBuffer;
-
         public MapRendererMod(ModContentPack content) : base(content)
         {
             settings = GetSettings<MapRendererSettings>();
+            ListingStandardHelper.Gap = 10f;
         }
 
         public override string SettingsCategory() => "MR_MapRender".Translate();
 
         public override void DoSettingsWindowContents(Rect inRect)
         {
-            ModWindowHelper.Reset();
-            ModWindowHelper.MakeLabeledCheckbox(inRect, "MR_ShowWeatherLabel".Translate(), ref settings.showWeather);
-            AddExportFormatOptions(inRect);
-            ModWindowHelper.MakeTextFieldNumericLabeled<int>(inRect, "MR_QualityLabel".Translate(), ref settings.quality, ref this.qualityBuffer, 0, 1500);
-            ModWindowHelper.MakeLabeledTextField(inRect, "MR_PathLabel".Translate(), ref settings.path);
+            Listing_Standard listing_Standard = new Listing_Standard();
+            listing_Standard.Begin(inRect);
+            listing_Standard.AddLabeledCheckbox("MR_ShowWeatherLabel".Translate(), ref settings.showWeather);
+            listing_Standard.AddHorizontalLine(3f);
+            listing_Standard.AddLabeledRadioList($"{"MR_AddExportFormatOptionsDescription".Translate()}:", exportFormats, ref settings.exportFormat);
+            listing_Standard.AddHorizontalLine(3f);
+            listing_Standard.AddLabeledNumericalTextField<int>("MR_QualityLabel".Translate(), ref settings.quality);
+            listing_Standard.AddLabeledTextField("MR_PathLabel".Translate(), ref settings.path);
+            listing_Standard.End();
             settings.Write();
         }
 
-        private void AddExportFormatOptions(Rect rect)
-        {
-            GUI.BeginGroup(rect);
-            ModWindowHelper.MakeLabel(rect, $"{"MR_AddExportFormatOptionsDescription".Translate()}:");
-            ModWindowHelper.MakeLabeledRadioList(rect, exportFormats, ref settings.exportFormat);
-            GUI.EndGroup();
-        }
     }
 }

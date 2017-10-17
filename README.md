@@ -1,4 +1,4 @@
-# MapRender [![RimWorld Alpha 17](https://img.shields.io/badge/RimWorld-Alpha%2017-brightgreen.svg)](http://rimworldgame.com/) 
+# MapRender [![RimWorld Alpha 17](https://img.shields.io/badge/RimWorld-Alpha%2017-brightgreen.svg)](http://rimworldgame.com/)
 
 *EARLY RELEASE*
 
@@ -14,7 +14,9 @@ German - Erdelf
 
 ## Acknowledgements
 
-Thanks to Brrainz, Erdelf, Spdskatr, Mehni, Xen, and many others for comments and suggestions. 
+Credit to DoctorVanGogh for `TextureUtils.CopyTo` method and help redesigning codebase to use `System.Drawing.Imaging`.
+
+Appreciation for comments and suggestions from Brrainz, Erdelf, Spdskatr, Mehni, Xen, and many others.
 
 Special thanks to Pardeike's amazing non-destructive patching library, Harmony.
 <p align="center">
@@ -29,4 +31,4 @@ Special thanks to Pardeike's amazing non-destructive patching library, Harmony.
   <a href="./LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-lightgray.svg?style=flat" alt="MIT License" />
   </a>
-</p> 
+</p>
