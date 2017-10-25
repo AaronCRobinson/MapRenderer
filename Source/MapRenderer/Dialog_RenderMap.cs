@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Verse;
 using RimWorld;
 using UnityEngine;
@@ -39,6 +36,7 @@ namespace MapRenderer
             this.buttonAText = "MR_RenderButtonLabel".Translate();
             this.buttonAAction = () => {
                 RenderMap renderMap = GameObject.Find("GameRoot").AddComponent<RenderMap>() as RenderMap;
+                renderMap.Initialize();
                 renderMap.Render();
             };
             this.buttonBText = "MR_CloseButtoLabel".Translate();

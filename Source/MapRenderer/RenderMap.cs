@@ -1,10 +1,7 @@
-﻿using RimWorld.Planet;
-using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Runtime.InteropServices;
 using UnityEngine;
 using Verse;
 
@@ -12,13 +9,13 @@ namespace MapRenderer
 {
     // https://forum.unity3d.com/threads/render-texture-to-png-arbg32-no-opaque-pixels.317451/
 
+    // NOTE: creating a new camera would be a better solution (how?)
     public class RenderMap : MonoBehaviour
     {
         private static bool isRendering;
 
         private Camera camera;
         private Map map;
-        //private Texture2D mapImage;
 
         private Vector3 rememberedRootPos;
         private float rememberedRootSize;
@@ -48,8 +45,10 @@ namespace MapRenderer
 
         public static bool IsRendering { get => isRendering; set => isRendering = value; }
 
-        // NOTE: creating a new camera would be a better solution (how?)
-        public RenderMap()
+        // NOTE: unity is not calling the constructor, so we manually call it
+        public RenderMap() { }
+
+        public void Initialize()
         {
             this.camera = Find.Camera;
             this.map = Find.VisibleMap;
@@ -82,6 +81,9 @@ namespace MapRenderer
         private IEnumerator Renderer(string imageName)
         {
             IsRendering = true;
+#if DEBUG
+            Log.Message("Start Renderer");
+#endif
 
             // NOTE: this could potentially go in the constructor...
             this.camera.GetComponent<CameraDriver>().enabled = false;
@@ -133,6 +135,9 @@ namespace MapRenderer
             Destroy(this);
 
             IsRendering = false;
+#if DEBUG
+            Log.Message("Finished Renderer");
+#endif
         }
 
         private void RestoreCamera() => RenderTexture.active = this.camera.targetTexture = null;
@@ -148,7 +153,13 @@ namespace MapRenderer
 
         private IEnumerator RenderCurrentView()
         {
+#if DEBUG
+            Log.Message("Start of RenderCurrentView");
+#endif
             yield return new WaitForEndOfFrame();
+#if DEBUG
+            Log.Message("After WaitForEndOfFrame");
+#endif
 
             this.SetCamera();
 
@@ -158,6 +169,10 @@ namespace MapRenderer
             // render the texture
             if (MapRendererMod.settings.showWeather) this.map.weatherManager.DrawAllWeather();
             this.camera.Render();
+
+#if DEBUG
+            Log.Message("After Render");
+#endif
 
             /*this.RestoreCamera();
             yield return new WaitForEndOfFrame();
@@ -170,6 +185,9 @@ namespace MapRenderer
             this.mapImage.UnlockBits(bmpData);
 
             this.RestoreCamera();
+#if DEBUG
+            Log.Message("End of RenderCurrentView");
+#endif
         }
 
         private string ImagePath(string imageName, string ext = "png")
