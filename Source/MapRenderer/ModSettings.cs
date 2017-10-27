@@ -61,7 +61,7 @@ namespace MapRenderer
             listing_Standard.AddHorizontalLine(3f);
             listing_Standard.AddLabeledRadioList($"{"MR_AddExportFormatOptionsDescription".Translate()}:", exportFormats, ref settings.exportFormat);
             listing_Standard.AddHorizontalLine(3f);
-            listing_Standard.AddLabeledNumericalTextField<int>("MR_QualityLabel".Translate(), ref settings.quality);
+            listing_Standard.AddLabeledNumericalTextField<int>("MR_QualityLabel".Translate(), ref settings.quality, minValue: 1f, maxValue: 2000f);
             listing_Standard.AddLabeledTextField("MR_PathLabel".Translate(), ref settings.path);
             listing_Standard.End();
             settings.Write();

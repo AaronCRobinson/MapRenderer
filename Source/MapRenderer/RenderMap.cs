@@ -118,9 +118,9 @@ namespace MapRenderer
             }
 
             if (MapRendererMod.settings.exportFormat == "PNG")
-                mapImage.Save(ImagePath(imageName, "png"), ImageFormat.Png);
+                mapImage.Save(FindValidPath(imageName, "png"), ImageFormat.Png);
             else
-                mapImage.Save(ImagePath(imageName, "jpg"), ImageFormat.Jpeg);
+                mapImage.Save(FindValidPath(imageName, "jpg"), ImageFormat.Jpeg);
 
             // Restore camera and viewport
             this.RestoreCamera();
@@ -190,8 +190,24 @@ namespace MapRenderer
 #endif
         }
 
-        private string ImagePath(string imageName, string ext = "png")
+        private string FindValidPath(string imageName, string ext = "png")
         {
+            string filePath = ImagePath(imageName, ext);
+            if (!File.Exists(filePath))
+                return filePath;
+            // loop with numbers
+            int i = 1;
+            string newPath;
+            filePath = ImagePath(imageName, noExt: true);
+            do newPath = $"{filePath}{i++}.{ext}";
+            while (File.Exists(newPath));
+            return newPath;
+        }
+
+        private static string ImagePath(string imageName, string ext = "png", bool noExt = false)
+        {
+            if (noExt)
+                return Path.Combine(MapRendererMod.settings.path, $"{imageName}");
             return Path.Combine(MapRendererMod.settings.path, $"{imageName}.{ext}");
         }
 
