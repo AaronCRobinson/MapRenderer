@@ -43,6 +43,9 @@
     <Reference Include="0System.Drawing">
       <HintPath>..\..\Assemblies\0System.Drawing.dll</HintPath>
     </Reference>
+    <Reference Include="1SettingsHelper">
+      <HintPath>..\..\..\SettingsHelper\Assemblies\1SettingsHelper.dll</HintPath>
+    </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>$(RimworldManagedDir)\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
@@ -64,7 +67,6 @@
     <Compile Include="ModSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RenderMap.cs" />
-    <Compile Include="SettingsHelper.cs" />
     <Compile Include="TextureUtils.cs" />
   </ItemGroup>
   <ItemGroup>
