@@ -1,8 +1,6 @@
-# MapRender [![RimWorld Alpha 17](https://img.shields.io/badge/RimWorld-Alpha%2017-brightgreen.svg)](http://rimworldgame.com/) 
+# MapRender [![RimWorld Alpha 18](https://img.shields.io/badge/RimWorld-Alpha%2018-brightgreen.svg)](http://rimworldgame.com/)
 
-*EARLY RELEASE*
-
-This mod allows you to generate the full map as a png via using the settings menu (just below save).
+This mod allows you to generate the full map at high resolution as a png via using the settings menu (just below save).
 
 The button to use this feature is right under `save game`. Settings are also available that allow customization.
 
@@ -14,7 +12,9 @@ German - Erdelf
 
 ## Acknowledgements
 
-Thanks to Brrainz, Erdelf, Spdskatr, Mehni, Xen, and many others for comments and suggestions. 
+Credit to DoctorVanGogh for `TextureUtils.CopyTo` method and help redesigning codebase to use `System.Drawing.Imaging`.
+
+Appreciation for comments and suggestions from Brrainz, Erdelf, Spdskatr, Mehni, Xen, and many others.
 
 Special thanks to Pardeike's amazing non-destructive patching library, Harmony.
 <p align="center">
@@ -29,4 +29,4 @@ Special thanks to Pardeike's amazing non-destructive patching library, Harmony.
   <a href="./LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-lightgray.svg?style=flat" alt="MIT License" />
   </a>
-</p> 
+</p>
