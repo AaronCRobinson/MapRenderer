@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LanguageData>
+
+  <MR_MapRender>マップレンダー</MR_MapRender>
+  <MR_RenderButtonLabel>描画する</MR_RenderButtonLabel>
+  <MR_CloseButtoLabel>閉じる</MR_CloseButtoLabel>
+  <MR_MapRenderDescription>描画するをクリックして、地図を描画します。</MR_MapRenderDescription>
+  <MR_AddExportFormatOptionsDescription>エクスポート形式を選択します。</MR_AddExportFormatOptionsDescription>
+  <MR_QualityLabel>品質</MR_QualityLabel>
+  <MR_PathLabel>保存先</MR_PathLabel>
+  <MR_ShowWeatherLabel>天気を表示する</MR_ShowWeatherLabel>
+
+</LanguageData>
