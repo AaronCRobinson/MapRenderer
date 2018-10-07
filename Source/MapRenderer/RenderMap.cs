@@ -41,7 +41,7 @@ namespace MapRenderer
         public RenderMap()
         {
             this.camera = Find.Camera;
-            this.map = Find.VisibleMap;
+            this.map = Find.CurrentMap;
 
             // save camera data
             this.rememberedRootPos = map.rememberedCameraPos.rootPos;
