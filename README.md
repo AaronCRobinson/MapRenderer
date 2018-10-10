@@ -1,4 +1,4 @@
-# MapRender [![RimWorld Beta 19](https://img.shields.io/badge/RimWorld-Beta%20v0.19-green.svg?longCache=true&style=plastic)](http://rimworldgame.com/)
+# MapRender [![RimWorld 1.0](https://img.shields.io/badge/RimWorld-1.0-green.svg?longCache=true&style=plastic)](http://rimworldgame.com/)
 
 This mod allows you to generate the full map at high resolution as a png via using the settings menu (just below save).
 
