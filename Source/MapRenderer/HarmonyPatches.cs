@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using UnityEngine;
 using Verse;
 using RimWorld;
-using Harmony;
+using HarmonyLib;
 
 namespace MapRenderer
 {
@@ -35,7 +34,7 @@ namespace MapRenderer
 #if DEBUG
             HarmonyInstance.DEBUG = true;
 #endif
-            HarmonyInstance harmony = HarmonyInstance.Create("rimworld.whyisthat.maprenderer.main");
+            Harmony harmony = new Harmony("rimworld.whyisthat.maprenderer.main");
 
             harmony.Patch(AccessTools.Method(typeof(MainMenuDrawer), nameof(MainMenuDrawer.DoMainMenuControls)), null, null, new HarmonyMethod(typeof(HarmonyPatches), nameof(Transpiler)));
             //harmony.Patch(AccessTools.Method(typeof(GenMapUI), nameof(GenMapUI.LabelDrawPosFor), new Type[] { typeof(Thing), typeof(float) }), new HarmonyMethod(typeof(HarmonyPatches), nameof(LabelDrawPosForPrefix)), null);
